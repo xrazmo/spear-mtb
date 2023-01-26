@@ -79,11 +79,12 @@ process PREDICT_DST{
     tuple val(meta), path("*.effects.csv"), emit: effects
     tuple val(meta), path("*.mutations.csv"),optional:true, emit: mutations
     tuple val(meta), path("*.variants.csv"),optional:true, emit: variants
+    tuple val(meta), path("*.json"),optional:true, emit: json
 
     script:
     
     """
-    python ${baseDir}/bin/sp3predict.py --prefix ${meta.id} --vcf_file $vcf --catalogue_file $catalog --genome_object $ref_pkl --progress --ignore_vcf_status --ignore_vcf_filter --debug
-
+    touch ${meta.id}.effects.csv 
+    gnomonicus --vcf_file .$vcf --genome_object $ref_pkl --catalogue_file $catalog  --output_dir . --json --progress
     """
 } 
