@@ -32,9 +32,8 @@ def collect_tbprofilers(rep_dir,report_dict):
                    if len(res_dict["lineage"]):
                       ptr["lineage"] = res_dict["lineage"][-1] 
 
+            ptr["res_var"][catalog] = {}
             for rvr in res_dict["dr_variants"]:
-                if catalog not in ptr["res_var"]:
-                    ptr["res_var"][catalog] = {}
                 ptr_cat = ptr["res_var"][catalog]
                 for drg in rvr["drugs"]:
                     if drg["drug"] not in ptr_cat:

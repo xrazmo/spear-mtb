@@ -70,7 +70,7 @@ process VARIANT_CALL {
     """
 }
 process PREDICT_DST{
-    tag "$meta.id"
+    tag "$meta.id-$meta.cat "
     label 'process_medium'
 
     input:
@@ -85,6 +85,10 @@ process PREDICT_DST{
     
     """
     touch ${meta.id}.effects.csv 
-    gnomonicus --vcf_file .$vcf --genome_object $ref_pkl --catalogue_file $catalog  --output_dir . --json --progress
+    gnomonicus --vcf_file $vcf --genome_object $ref_pkl --catalogue_file $catalog  --output_dir . --json --progress
+    mv *.effects.csv ${meta.id}.${meta.cat}.cryptic.effects.csv
+    mv *.variants.csv ${meta.id}.${meta.cat}.cryptic.variants.csv
+    mv *.mutations.csv ${meta.id}.${meta.cat}.cryptic.mutations.csv
+    mv *.json ${meta.id}.${meta.cat}.cryptic.json
     """
 } 

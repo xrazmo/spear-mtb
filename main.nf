@@ -6,45 +6,64 @@ include {VARIANT_CALL as vrc} from "$baseDir/workflows/clockwork/main"
 include {PREDICT_DST as prd} from "$baseDir/workflows/clockwork/main"
 
 include {TBPROFILER_PROFILE as tbp} from "$baseDir/workflows/tbprofiler/profile/main"
+include {GENERATE_REPORT as grp} from "$baseDir/workflows/local/utility/main"
 
-params.ref_dir = "${baseDir}/ref_db"
-params.input_gz = ""
-params.prefix = ""
-params.input_catalog = "${baseDir}/catalogues"
 
-def vcf_dir = "${baseDir}/out_vcf"
-def out_dir = "${baseDir}/out_csv"
-def h37Rv_dir = "${params.ref_dir}/Ref.H37Rv";
+params.input_dir = ""
+
+def assets_dir = "${baseDir}/assets"
+def h37Rv_dir = "${assets_dir}/Ref.H37Rv";
+def out_dir = params.out_dir ?: "${baseDir}/out"
 
 workflow{
 
-   reads_ch = Channel.fromFilePairs("${params.input_gz}/*/*_{1,2}.fastq.gz").map{it->[[id:it[0]],it[1]]};
-   ref_fa = Channel.fromPath("${params.ref_dir}/Ref.remove_contam/*.fa");
+    // Checking assets
 
+   file(out_dir).mkdir()
+
+   reads_ch = Channel.fromFilePairs("${params.input_dir}/*_{1,2}.fastq.gz")
+                     .concat(Channel.fromFilePairs("${params.input_dir}/*/*_{1,2}.fastq.gz"));
+
+   ref_fa = Channel.fromPath("${assets_dir}/Ref.remove_contam/*.fa");
+   
    // Running TBPROFILER
-   tbp(reads_ch)
+   tbpr_ch = reads_ch.map{it->[[id:"${it[0]}.tbprofiler",single_end:false],it[1]]}
+   tbp(tbpr_ch)
 
    // Running CRyPTIC workflow
-   ref_tsv = Channel.fromPath("${params.ref_dir}/Ref.remove_contam/*.tsv");
-
-   mpr(reads_ch.combine(ref_fa)) 
-   rmc(mpr.out.sam.combine(ref_tsv))
+   contam_ref_ch = Channel.fromPath("${assets_dir}/Ref.remove_contam/*.tsv");
+   cryptic_ch =  reads_ch.combine(ref_fa).map{it->[[id:"${it[0]}.cryptic"],it[1],it[2]]}
+   
+   mpr(cryptic_ch) 
+   rmc(mpr.out.sam.combine(contam_ref_ch))
    vrc(rmc.out.reads,h37Rv_dir)
    
-   file(vcf_dir).mkdir()
-   vrc.out.final_vcf.map{it-> it[1]}.flatten().collectFile(storeDir:vcf_dir)
-
-    catalog_ch = Channel.fromPath("${params.input_catalog}/*/*.csv")
-    refpkl_ch = Channel.fromPath("${params.input_catalog}/*/*.gz")
-
-    ch = vrc.out.final_vcf.combine(catalog_ch).combine(refpkl_ch)
    
-    prd(ch)
+   vrc.out.final_vcf.map{it-> it[1]}.flatten().collectFile(storeDir:out_dir)
+
+   catalog_ch = Channel.fromPath("${assets_dir}/catalogues/*/*.csv")
+   refpkl_ch = Channel.fromPath("${assets_dir}/catalogues/*/*.gz")
+
+   ch = vrc.out.final_vcf.combine(catalog_ch).combine(refpkl_ch)
+           .map{it->[[id:it[1].simpleName,cat:it[2].simpleName],it[1],it[2],it[3]]}
+   prd(ch)
     
-    file(vcf_dir).mkdir()
-    prd.out.effects.map{it->it[1]}.flatten()
-        .collectFile(name:"merged.effects.${params.prefix}.csv",keepHeader:true,storeDir:out_dir)
+    
+   ser_ch = prd.out.effects
+          .concat(prd.out.mutations)
+          .concat(prd.out.variants)
+          .concat(prd.out.json)
+          .concat(tbp.out.txt)
+          .concat(tbp.out.json)
+          .map{it->it[1]}.flatten()
+          .collectFile(storeDir:out_dir)
 
-    // Merging results    
-
+    grp(ser_ch.collect(),"${assets_dir}/report/report-template.html")
+    grp.out.html.collectFile(storeDir:out_dir)
 } 
+
+workflow generate_report{
+    json_ch = Channel.fromPath("${out_dir}/*.json").collect()
+    grp(json_ch,"${assets_dir}/report/report-template.html")
+    grp.out.html.collectFile(storeDir:out_dir)
+}
