@@ -1,4 +1,4 @@
-## SPEAR-MTB: en*S*emble *P*r*E*diction of *A*ntibiotic *R*esistance in *M*ycobacterium *T*u*B*erculosis
+ ##  <img src="https://raw.githubusercontent.com/xrazmo/spear-mtb/main/assets/report/logo.png" width="50" height="50" > SPEAR-MTB: en*S*emble *P*r*E*diction of *A*ntibiotic *R*esistance in *M*ycobacterium *T*u*B*erculosis
 
 This repository has employed the following pipelines in order to arrive at a consensus on drug-resistant _Mycobacterium tuberculosis_ predictions:
 
