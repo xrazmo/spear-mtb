@@ -37,7 +37,11 @@ These commands perform the following steps:
 - Downloading and extracting the precompiled reference database for the CRyPTIC pipeline.
 - Downlaoding the latest version of catalogues.
 
----
+## <<<<<<< HEAD
+
+=======
+
+> > > > > > > e8f5e84d2b2e7557ac074fbb904f95e03c3fa173
 
 ## **Usage**
 
@@ -62,7 +66,11 @@ nextflow run ../spear-mtb/main.nf -profile [slurm or interactive] -w [working-di
 nextflow run ../spear-mtb/main.nf -profile [slurm or interactive] -w [working-directory] --out_dir [output-directory] -entry generate_report
 ```
 
----
+## <<<<<<< HEAD
+
+=======
+
+> > > > > > > e8f5e84d2b2e7557ac074fbb904f95e03c3fa173
 
 ## **Report**
 
