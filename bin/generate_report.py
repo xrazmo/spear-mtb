@@ -18,19 +18,25 @@ def convert_drugname(abbr):
 def collect_tbprofilers(rep_dir,report_dict):
     
     # Extract tbprofiler dictionary
-    tbp_out_lst = glob(os.path.join(rep_dir,"*tbprofiler.results.json"))
+    tbp_out_lst = sorted(glob(os.path.join(rep_dir,"*tbprofiler.results.json")))
     catalog= "TB-Profiler"
     for fj in tbp_out_lst:
         sid = os.path.basename(fj).split('.')[0]
         if sid not in report_dict:
-            report_dict[sid] = {"seqid":sid,"lineage":{},"res_var":{},"other_var":{}}
+            report_dict[sid] = {"seqid":sid,"lineage":{},"res_var":{},"other_var":{}, "valid":1}
         ptr = report_dict[sid]
         with open(fj) as hdl:
             res_dict = json.load(hdl)
             # Directly extracting the sublineage
-            if "lineage" in res_dict:
-                   if len(res_dict["lineage"]):
-                      ptr["lineage"] = res_dict["lineage"][-1] 
+            if "main_lin" in res_dict:
+                   pp = res_dict["main_lin"].split(';')
+                   if len(pp)==1:
+                    if len(res_dict["lineage"]):
+                      ptr["lineage"] = res_dict["lineage"][-1] # selecting the last sublineage
+                   elif len(pp)>1:
+                        ptr["lineage"] = {"lin":res_dict["main_lin"],"family": "Metagenomic sample: multiple lineages were detected.",
+                                          "spoligotype": "","rd": "","frac":'' }
+                        ptr["valid"]=0
 
             ptr["res_var"][catalog] = {}
             for rvr in res_dict["dr_variants"]:
@@ -38,7 +44,7 @@ def collect_tbprofilers(rep_dir,report_dict):
                 for drg in rvr["drugs"]:
                     if drg["drug"] not in ptr_cat:
                             ptr_cat[drg["drug"]]= []
-                    ptr_cat[drg["drug"]].append({"mutation":f"{rvr['gene']}@{rvr['change']}", "phenotype":"R"})
+                    ptr_cat[drg["drug"]].append({"mutation":f"{rvr['gene']}@{rvr['change']}", "phenotype":"R","freq":round(rvr['freq'],2)})
 
             if catalog not in ptr["other_var"]:
                 ptr["other_var"][catalog] = {}
@@ -48,7 +54,7 @@ def collect_tbprofilers(rep_dir,report_dict):
                 for drg in ovr["gene_associated_drugs"]:
                     if drg not in ptr_cat:
                             ptr_cat[drg]= []
-                    ptr_cat[drg].append({"mutation":f"{ovr['gene']}@{ovr['change']}","phenotype":'U'})
+                    ptr_cat[drg].append({"mutation":f"{ovr['gene']}@{ovr['change']}","phenotype":'U',"freq":round(rvr['freq'],2)})
 
     return report_dict
 
@@ -116,4 +122,5 @@ if __name__=="__main__":
     options = parser.parse_args()
 
     generate(options.in_dir,options.html)
-
+    
+    
