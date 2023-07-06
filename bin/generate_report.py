@@ -54,7 +54,7 @@ def collect_tbprofilers(rep_dir,report_dict):
                 for drg in ovr["gene_associated_drugs"]:
                     if drg not in ptr_cat:
                             ptr_cat[drg]= []
-                    ptr_cat[drg].append({"mutation":f"{ovr['gene']}@{ovr['change']}","phenotype":'U',"freq":round(rvr['freq'],2)})
+                    ptr_cat[drg].append({"mutation":f"{ovr['gene']}@{ovr['change']}","phenotype":'U',"freq":round(ovr['freq'],2)})
 
     return report_dict
 

@@ -6,10 +6,10 @@ process TBPROFILER_PROFILE {
 	maxRetries 2
 	errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'ignore' }
 	 
-    conda (params.enable_conda ? "bioconda::tb-profiler=3.0.8" : null)
+    conda (params.enable_conda ? "bioconda::tb-profiler=4.4.2" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/tb-profiler:3.0.8--pypyh5e36f6f_0' :
-        'quay.io/biocontainers/tb-profiler:3.0.8--pypyh5e36f6f_0' }"
+        'https://depot.galaxyproject.org/singularity/tb-profiler:4.4.2--pyh7cba7a3_0' :
+        'quay.io/biocontainers/tb-profiler' }"
 
     input:
     tuple val(meta), path(reads)
