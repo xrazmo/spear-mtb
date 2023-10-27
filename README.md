@@ -1,4 +1,4 @@
- ##  <img src="https://raw.githubusercontent.com/xrazmo/spear-mtb/main/assets/report/logo.png" width="50" height="50" > SPEAR-MTB: en*S*emble *P*r*E*diction of *A*ntibiotic *R*esistance in *M*ycobacterium *T*u*B*erculosis
+## <img src="https://raw.githubusercontent.com/xrazmo/spear-mtb/main/assets/report/logo.png" width="50" height="50" > SPEAR-MTB: en*S*emble *P*r*E*diction of *A*ntibiotic *R*esistance in *M*ycobacterium *T*u*B*erculosis
 
 This repository has employed the following pipelines in order to arrive at a consensus on drug-resistant _Mycobacterium tuberculosis_ predictions:
 
@@ -7,15 +7,12 @@ This repository has employed the following pipelines in order to arrive at a con
 - **[TB Profiler](https://github.com/jodyphelan/TBProfiler)**:
   The pipeline includes aligning reads to the H37Rv reference genome, utilizing a pairwise aligner and then identifying variations with the use of bcftools. The catalogue of mutations is in [hgvs nomenclature](http://varnomen.hgvs.org/bg-material/simple/) and is maintained [here](https://github.com/jodyphelan/tbdb).
 
-  > &#128712;**Info:**
-  > A catalogue containing suggested mutaions by public health sweden (Fohm) will be added soon.
-
 > &#x26A0; **Warning:**
-> The spear-MTB pipeline is only tested using Illumina paired-end reads and on Unix-based system having Singularity.
+> The spear-MTB pipeline is tested using Illumina paired-end reads and on Unix-based system having Singularity.
 
 ## **Installation**
 
-Spear-MTB needs you to install the following programs:
+Befor running the pipeline, please ensure that you have the following programs installed:
 
 - Nextflow
 - Singularity
@@ -32,33 +29,48 @@ These commands perform the following steps:
 
 - Downloading the repository from Github.
 - Creating a conda environment named _spear-mtb_.
-- Downloading and extracting the precompiled reference database for the CRyPTIC pipeline.
-- Downlaoding the latest version of catalogues.
+- Downloading and extracting the precompiled assets, which encompasses indexed genomes, the reference H37rv, mutations catalogues, and a KRAKEN2 database containing genomes belong to _Mycobacteriaceae_ family.
+
+For updating mutation catalogues run the following command:
+
+```
+./setup.sh -u
+```
 
 ## **Usage**
 
 ### - Nextflow config file:
 
-Setting up the config file...
-
-```
-
-```
+Before running the pipeline, please review and modify the configuration file (nextflow.config) to suit your specific requirements and preferences. Note that the current configuration file includes predefined profiles and resource allocation designed for the RACKHAM cluster at UPPMAX.
 
 ### - Running the pipeline:
 
 ```
-conda activate spear-mtb
-nextflow run ../spear-mtb/main.nf -profile [slurm or interactive] -w [working-directory] --input_dir [Reads-directory] --out_dir [output-directory]
-```
+Usage:
+  spear-mtb.sh [-t <tmp_dir>] [-c <config_file>] [-a <assets_dir>] [-p <prefix>] [-f <profile>] [-o <out_dir>] <input_directory>
 
-### - Merging outputs:
+Options:
+  -t        Temporary directory: Set the location for temporary files (default: PARENT_DIR/.tmp)
+  -c        Config file: Specify a Nextflow configuration file (default: nextflow.config)
+  -a        Assets directory: Specify the assets directory containing reference genomes and catalogues (default: SCRIPT_DIR/assets)
+  -p        Prefix: Customize the name of the trace file produced by Nextflow (default: date-time).
+  -f        Profile: Specify the profile already defined in your config file (default: 'slurm')
+  -o        Output directory: output directory containing results: vcf, csv, json, html files (default: PARENT_DIR/out)
+
+Arguments:
+  <input_directory>            Input directory: specify a directory containing Illumina paired-end reads or folders containing them.
+
+Examples:
+
+  spear-mtb.sh path/to/input_data
+
+  spear-mtb.sh -t /tmp -c custom.config -a /path/to/assets -p myprefix -f slurm -o /path/to/output /path/to/input_data
+
 
 ```
-nextflow run ../spear-mtb/main.nf -profile [slurm or interactive] -w [working-directory] --out_dir [output-directory] -entry generate_report
-```
-
 
 ## **Report**
 
-HTML template...
+SPEAR-MTB integrates predictions based on different pipelines and catalogues in an interactive offline HTML file, which will be delivered to your specified output directory. For more information, please refer to the help window within the report.
+
+<img src="https://raw.githubusercontent.com/xrazmo/spear-mtb/main/assets/report/report.jpg" >
