@@ -6,16 +6,17 @@ process TBPROFILER_PROFILE {
 	maxRetries 2
 	errorStrategy { task.exitStatus in 137..140 ? 'retry' : 'ignore' }
 	 
-    conda (params.enable_conda ? "bioconda::tb-profiler=4.4.2" : null)
+    conda (params.enable_conda ? "bioconda::tb-profiler=5.0.1-pyhdfd78af_1" : null)
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/tb-profiler:4.4.2--pyh7cba7a3_0' :
-        'quay.io/biocontainers/tb-profiler' }"
+        'https://depot.galaxyproject.org/singularity/tb-profiler:5.0.1--pyhdfd78af_1' :
+        'quay.io/biocontainers/tb-profiler:5.0.1--pyhdfd78af_1' }"
 
     input:
     tuple val(meta), path(reads)
 
     output:
     tuple val(meta), path("bam/*.bam")     , emit: bam
+    tuple val(meta), path("bam/*.bam.bai") , emit: bai
     tuple val(meta), path("results/*.csv") , emit: csv, optional: true
     tuple val(meta), path("results/*.json"), emit: json
     tuple val(meta), path("results/*.txt") , emit: txt, optional: true
