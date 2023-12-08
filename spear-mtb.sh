@@ -29,22 +29,22 @@ default_prefix="$out_dir/$(date +'%y%m%d-%H%M%S')"
 while getopts "t:c:a:p:o:f:" opt; do
   case $opt in
     t)
-      tmp_dir="$OPTARG"
+      tmp_dir=$(readlink -f "$OPTARG")
       ;;
     c)
-      config_file="$OPTARG"
+      config_file=$(readlink -f "$OPTARG")
       ;;
     a)
-      assets_dir="$OPTARG"
+      assets_dir=$(readlink -f "$OPTARG")
       ;;
     p)
-      prefix="$OPTARG"
+      prefix=$(readlink -f "$OPTARG")
       ;;
     o)
-      out_dir="$OPTARG"
+      out_dir=$(readlink -f "$OPTARG")
       ;;
     f)
-      profile="$OPTARG"
+      profile=$(readlink -f "$OPTARG")
       ;;  
     \?)
       echo "Invalid option: -$OPTARG" >&2
@@ -66,7 +66,7 @@ if [ "$#" -ne 1 ]; then
   exit 1
 fi
 
-input_dir="$1"
+input_dir=$(readlink -f "$1")
 
 if [ -z "$prefix" ]; then
   prefix="$default_prefix"
@@ -88,7 +88,7 @@ echo "Running SPEAR-MTB..."
 
 cd "$tmp_dir"
 source activate spear-mtb
-nextflow run "$SRC/main.nf" -profile "$profile" -c "$config_file" -w "$work_dir" --out_dir "$out_dir" --input_dir "$input_dir" -with-trace "$trace_file"
+nextflow run "$SRC/main.nf" -profile "$profile" -c "$config_file" -w "$work_dir" --assets_dir $assets_dir --out_dir "$out_dir" --input_dir "$input_dir" -with-trace "$trace_file"
 
 echo ""
 echo "    ______ _         _        __               __"
