@@ -27,7 +27,7 @@ echo "-Downloading the reference databases for CRyPTIC workflow"
 
 if [ "$update_catalogues" = false ]; then
   cd $SRC
-  wget -O "assets.tar.gz" https://figshare.com/ndownloader/files/38856204
+  wget -O "assets.tar.gz" https://figshare.com/ndownloader/files/42914548
   tar -xvzf assets.tar.gz
   # rm "assets.tar.gz"
 fi
